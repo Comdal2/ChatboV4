@@ -14,8 +14,7 @@ const client = new Client({
   });
 
 client.on('ready', () => {
-    console.log('Conexión Exitosa');
-    console.log('Cambios');
+    console.log('Conexión Exitosa');    
 });
 
 client.on('qr', qr => {
