@@ -1,5 +1,6 @@
 import pkg from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
+import flowMenu from "./events/mensajes.js"
 
 const { Client, LocalAuth } = pkg;
 
@@ -14,7 +15,8 @@ const client = new Client({
   });
 
 client.on('ready', () => {
-    console.log('Conexión Exitosa');    
+    console.log('Conexión Exitosa'); 
+
 });
 
 client.on('qr', qr => {
@@ -22,6 +24,6 @@ client.on('qr', qr => {
 });
 
 client.initialize().catch((err) => {
-    console.error("Error al inicializar el cliente:", err);
+    console.error("No se pudo iniciar el cliente. ERROR: ", err);
   });
 
