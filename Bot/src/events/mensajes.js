@@ -1,5 +1,5 @@
 import pkg from "whatsapp-web.js";
-import path from "path";
+import { ValidacionPalabras } from "../validation/validaciones.js";
 
 const { MessageMedia, Location } = pkg;
 
@@ -46,6 +46,22 @@ const PALABRAS_CLAVE_BIENVENIDA = [
     "q tal",
     "buenas"
 ]
+const OPCIONES_MENU = {
+    MENU_PRINCIPAL:
+    "Soy su asistente virtual\n"+
+    "¿En qué puedo ayudarle hoy",
+    MENU_OPCIONES: 
+    "Aqui tiene algunas opociones\n"+
+    "(Digite la opción):\n"+
+    "*1* Ver el menú 🍕🍔\n"+
+    "*2* Hacer un pedido 😋\n"+
+    "*3* Consultar estado de mi pedido 🧾\n"+
+    "*4* Ubicaciones y horarios 🌎⏰\n"+
+    "*5* hablar con un agente 💬",
+    MENU_AYUDA:
+    "¿Necesitas ayuda?"
+}
+
 
 class flowMenu{
 
@@ -57,25 +73,45 @@ class flowMenu{
     initialize(){
         this.client.on("message", this.eventMessage.bind(this));
     }
+
     async eventMessage(msg){
         console.log("De: ", msg.from);
         console.log("Mensaje: ", msg.body);
         if (msg.from == "593984990218@c.us") {
             await this.eventRegisteredUser(msg);
+        } else {
+            
         }
     }
+
     async eventRegisteredUser(msg){
         if (ValidacionPalabras(this.FormateoMensaje(msg.body), PALABRAS_CLAVE_BIENVENIDA)) {
             await this.eventWelcome(msg.from);
         }
     }
+
     async eventWelcome(chatID){
-        //const logo = MessageMedia.fromUrl("https://images.crazygames.com/games/papas-pizzeria/cover-1628776612329.png?auto=format%2Ccompress&q=45&cs=strip&ch=DPR&w=1200&h=630&fit=crop");
-        /*await this.client.sendMessage(chatID, logo, {
-            caption: "¡Hola!, Bienvenido a Papa's Pizzeria"
-        });*/
-        await this.client.sendMessage(chatID, "¡Hola!, Bienvenido a Papa's Pizzeria")
+        try {         
+            const logo = MessageMedia.fromFilePath("./assets/image/MENU_LOGO.jpg");
+            await this.client.sendMessage(chatID, logo, {
+                caption: "¡Hola!, Bienvenido a Papa's Pizzeria"
+            });
+            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_PRINCIPAL);
+            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_OPCIONES);
+        } catch (error) {
+            console.log("ERROR_EVENTO_BIENVENIDA: " + error);   
+        }
     }
+
+    async eventHelp(chatID){
+        try {         
+            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_AYUDA);
+            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_OPCIONES);
+        } catch (error) {
+            console.log("ERROR_EVENTO_AYUDA: " + error);   
+        }
+    }
+
     FormateoMensaje(mensaje) {
         return mensaje.toLowerCase();   
     }

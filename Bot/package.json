@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "ChatBot para WhatsApp",
   "dependencies": {
+    "puppeteer": "^22.11.0",
     "qrcode-terminal": "^0.12.0",
     "whatsapp-web.js": "^1.24.0"
   }
