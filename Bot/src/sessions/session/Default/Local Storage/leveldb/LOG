@@ -1,2 +1,5 @@
-2024/06/14-18:07:54.425 2968 Creating DB C:\Users\Comdal\Desktop\ChatbotP\ChatboV4\Bot\src\sessions\session\Default\Local Storage\leveldb since it was missing.
-2024/06/14-18:07:54.454 2968 Reusing MANIFEST C:\Users\Comdal\Desktop\ChatbotP\ChatboV4\Bot\src\sessions\session\Default\Local Storage\leveldb/MANIFEST-000001
+2024/06/15-19:24:01.457 17b0 Reusing MANIFEST C:\Users\Comdal\Desktop\ChatbotP\ChatboV4\Bot\src\sessions\session\Default\Local Storage\leveldb/MANIFEST-000001
+2024/06/15-19:24:01.457 17b0 Recovering log #4
+2024/06/15-19:24:01.458 17b0 Level-0 table #7: started
+2024/06/15-19:24:01.464 17b0 Level-0 table #7: 19296 bytes OK
+2024/06/15-19:24:01.465 17b0 Delete type=0 #4

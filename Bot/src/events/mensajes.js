@@ -1,5 +1,4 @@
 import pkg from "whatsapp-web.js";
-import messages from "./mensajes.js";
 import path from "path";
 
 const { MessageMedia, Location } = pkg;
@@ -41,22 +40,44 @@ const PALABRAS_CLAVE_MENÚ_OPCIÓN_5 =
     "horarios",
     "horario"  
 ];
+const PALABRAS_CLAVE_BIENVENIDA = [
+    "hola",
+    "que tal",
+    "q tal",
+    "buenas"
+]
 
 class flowMenu{
 
-    constructor(cliente){
-        this.cliente = cliente;
+    constructor(client){
+        this.client = client;
+        this.initialize();
     }
 
     initialize(){
-        this.cliente.on("message", this.eventMessage.bind(this));
+        this.client.on("message", this.eventMessage.bind(this));
     }
     async eventMessage(msg){
         console.log("De: ", msg.from);
-        if (msg.body == "!hola") {
-            console.log("Mensaje: ", msg.body);
-            msg.reply('Comdo estas');
+        console.log("Mensaje: ", msg.body);
+        if (msg.from == "593984990218@c.us") {
+            await this.eventRegisteredUser(msg);
         }
+    }
+    async eventRegisteredUser(msg){
+        if (ValidacionPalabras(this.FormateoMensaje(msg.body), PALABRAS_CLAVE_BIENVENIDA)) {
+            await this.eventWelcome(msg.from);
+        }
+    }
+    async eventWelcome(chatID){
+        //const logo = MessageMedia.fromUrl("https://images.crazygames.com/games/papas-pizzeria/cover-1628776612329.png?auto=format%2Ccompress&q=45&cs=strip&ch=DPR&w=1200&h=630&fit=crop");
+        /*await this.client.sendMessage(chatID, logo, {
+            caption: "¡Hola!, Bienvenido a Papa's Pizzeria"
+        });*/
+        await this.client.sendMessage(chatID, "¡Hola!, Bienvenido a Papa's Pizzeria")
+    }
+    FormateoMensaje(mensaje) {
+        return mensaje.toLowerCase();   
     }
 }
 
