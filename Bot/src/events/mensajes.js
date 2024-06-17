@@ -102,7 +102,13 @@ const OPCIONES_MENU = {
     MENU_DESCRIPCION:
     "Aqui tienes el menú, tomate tu tiempo.\n"+
     "¿Deseas ordenar?\n"+
-    "Para ordenar digita [ *2* ]"
+    "Para ordenar digita [ *2* ]",
+    MENU_UBICACION:
+    "Atendemos todos los días de Lun - Vie de [ 10:00 A.M. - 8:00P.M. ]\n"+
+    "O si prefieres puedes visitarnos:",
+    MENU_AGENTE:
+    "Si deseas porte en contacto con nosotros puedes usar nuestra línea de servicio al cliente\n"+
+    "Llame al siguiente número [ *02-2996-519* ]"
 }
 
 
@@ -239,18 +245,22 @@ class flowMenu{
             console.log("ERROR_EVENTO_CONSULTA: " + error);   
         }
     }
-    //TODO EVENTO QUE SE DESPLIEGA CUANDO EL USUARIO QUIERE VER LA UBICACION DEL LOCAL Y SUS HORARIOS
+    //EVENTO QUE SE DESPLIEGA CUANDO EL USUARIO QUIERE VER LA UBICACION DEL LOCAL Y SUS HORARIOS
     async eventLocation(chatID){
         try {         
-            
+            const location = new Location(-1.2693696, -78.648095, {
+                url: "https://www.google.com/maps/place/Universidad+T%C3%A9cnica+de+Ambato/@-1.2693696,-78.648095,14z/data=!4m10!1m2!2m1!1suniversidad+tecnica+de+ambato!3m6!1s0x91d38225e088295f:0xb16c26da66e6e4b3!8m2!3d-1.2693706!4d-78.6259616!15sCh11bml2ZXJzaWRhZCB0ZWNuaWNhIGRlIGFtYmF0b5IBCnVuaXZlcnNpdHngAQA!16s%2Fm%2F0cpbjgr?entry=ttu",
+            });
+            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_UBICACION);
+            await this.client.sendMessage(chatID, location);
         } catch (error) {
             console.log("ERROR_EVENTO_UBICACIÓN: " + error);   
         }
     }
-    //TODO: EVENTO QUE SE DESPLIEGA CUANDO EL USUARIO QUIERE HABLAR CON UNA PERSONA (agent)
+    //EVENTO QUE SE DESPLIEGA CUANDO EL USUARIO QUIERE HABLAR CON UNA PERSONA (agent)
     async eventAgent(chatID){
         try {         
-            
+            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_AGENTE);
         } catch (error) {
             console.log("ERROR_EVENTO_AGENTE: " + error);   
         }
@@ -264,7 +274,7 @@ class flowMenu{
             console.log("ERROR_EVENTO_AYUDA: " + error);   
         }
     }
-
+    //MÉTODO QUE CAMBIA EL FORMATO DE LOS MENSAJES A MINÚSCULAS
     FormateoMensaje(mensaje) {
         return mensaje.toLowerCase();   
     }
