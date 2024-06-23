@@ -14,8 +14,6 @@ const PALABRAS_CLAVE_MENÚ_OPCIÓN_1 =
 const PALABRAS_CLAVE_MENÚ_OPCIÓN_2 = 
 [
     "2",
-    "pedido",
-    "hacer un pedido",
     "ordenar"
 ];
 const PALABRAS_CLAVE_MENÚ_OPCIÓN_3 = 
@@ -91,31 +89,50 @@ const OPCIONES_MENU = {
     MENU_AYUDA:
     "¿Necesitas ayuda?",
     MENU_SUBMENU_OPCION_1:
-    "Aquí tienes nuestro menú principal:\n"+
+    "🛒 Aquí tienes nuestro menú principal:\n"+
     "Por favor elija una categoría:\n"+
     "(Digite una letra):\n"+
-    "[ *A* ] Hamburguesas\n"+
-    "[ *B* ] Pizzas\n"+
-    "[ *C* ] Bebidas\n"+
-    "[ *D* ] Postres\n"+
+    "[ *A* ] Hamburguesas - $5.99\n"+
+    "[ *B* ] Pizzas - $8.99\n"+
+    "[ *C* ] Bebidas - $1.99\n"+
+    "[ *D* ] Postres - $2.99\n"+
     "[ *E* ] Promociones",
     MENU_DESCRIPCION:
-    "Aqui tienes el menú, tomate tu tiempo.\n"+
+    "Tomate tu tiempo.\n"+
     "¿Deseas ordenar?\n"+
     "Para ordenar digita [ *2* ]",
+    MENU_PROMOCION:
+    "🚀 Promociones actuales:\n"+
+    "- 10% de Descuento en pedidos mayores a $20\n"+
+    "- 2x1 en pizzas todos los martes",
     MENU_UBICACION:
-    "Atendemos todos los días de Lun - Vie de [ 10:00 A.M. - 8:00P.M. ]\n"+
+    "Atendemos todos los días de Lun - Vie de [ 10:00 A.M. - 8:00 P.M. ]\n"+
     "O si prefieres puedes visitarnos:",
     MENU_AGENTE:
     "Si deseas porte en contacto con nosotros puedes usar nuestra línea de servicio al cliente\n"+
-    "Llame al siguiente número [ *02-2996-519* ]"
+    "Llame al siguiente número [ *02-2996-519* ]",
+    MENU_PEDIDO:
+    "Para realizar un pedido debe hacerlo con el siguiente formato:\n"+
+    "Ejemplo: *Código: 1 - Cantidad: 1*"
 }
-
-
+//SIMULACION DE PRODUCTOS EN LA BASE DE DATOS
+const productos = [
+    { id: 1, nombre: 'Hamburguesa', precio: 5.99, stock: 10 },
+    { id: 2, nombre: 'Pizza', precio: 8.99, stock: 5 },
+    { id: 3, nombre: 'Papas Fritas', precio: 2.99, stock: 20 },
+    { id: 4, nombre: 'Refresco', precio: 1.99, stock: 0 }
+];
+const pedidos = [
+    { id: 1, estado: 'En preparación', productos: [{ id: 1, cantidad: 2 }, { id: 3, cantidad: 1 }] },
+    { id: 2, estado: 'Listo para recoger', productos: [{ id: 2, cantidad: 1 }] },
+    { id: 3, estado: 'Entregado', productos: [{ id: 4, cantidad: 3 }] },
+    { id: 4, estado: 'Cancelado', productos: [{ id: 1, cantidad: 1 }, { id: 4, cantidad: 1 }] }
+];
 class flowMenu{
 
     constructor(client){
         this.client = client;
+        this.order = {};
         this.initialize();
     }
 
@@ -146,6 +163,14 @@ class flowMenu{
             await this.eventMenuD(msg.from);
         }else if(ValidacionPalabras(this.FormateoMensaje(msg.body), PALABRAS_CLAVE_MENU.MENU_OPCION_5)){
             await this.eventMenuE(msg.from);
+        }else if (ValidacionPalabras(this.FormateoMensaje(msg.body), PALABRAS_CLAVE_MENÚ_OPCIÓN_2)){
+            await this.eventOrder(msg);
+        }else if (ValidacionPalabras(this.FormateoMensaje(msg.body), PALABRAS_CLAVE_MENÚ_OPCIÓN_4)){
+            await this.eventLocation(msg.from);
+        }else if (ValidacionPalabras(this.FormateoMensaje(msg.body), PALABRAS_CLAVE_MENÚ_OPCIÓN_5)){
+            await this.eventAgent(msg.from);
+        }else if (msg.body.startsWith('Pedido:')){
+            await this.eventBuscarPedido(msg.from, msg.body);
         } else {
             await this.eventHelp(msg.from);
         }
@@ -165,7 +190,7 @@ class flowMenu{
     }
     //EVENTO QUE DESPLIEGA UN MENSAJE CON UN SUBMENÚ PARA LA OPCION 1
     async eventMenú(chatID){
-        try {         
+        try {                    
             const menu = MessageMedia.fromFilePath("./assets/images/IMG_MENU_MENÚ.jpg");
             await this.client.sendMessage(chatID, menu, {
                 caption: OPCIONES_MENU.MENU_SUBMENU_OPCION_1
@@ -177,16 +202,18 @@ class flowMenu{
     //EVENTOS QUE ENVIAN LOS DIFERENTES MENÚS DISPONIBLES
     async eventMenuA(chatID){
         try {         
+            await this.client.sendMessage(chatID, "Aqui tienes el menú de hamburguesas: ");
             const imagen = MessageMedia.fromFilePath("./assets/images/IMG_MENU_HAMBURGER.jpg");
             await this.client.sendMessage(chatID, imagen, {
-                capture: OPCIONES_MENU.MENU_DESCRIPCION
+                caption: OPCIONES_MENU.MENU_DESCRIPCION
             });            
         } catch (error) {
             console.log("ERROR_EVENTO_MENU_OPCION_A: " + error);   
         }
     }
     async eventMenuB(chatID){
-        try {                     
+        try {          
+            await this.client.sendMessage(chatID, "Aqui tienes el menú de pizzas: ");           
             const pdf = MessageMedia.fromFilePath("./assets/documents/DOC_PIZZAS.pdf");
             await this.client.sendMessage(chatID, pdf, {
                 sendMediaAsDocument: true
@@ -198,9 +225,10 @@ class flowMenu{
     }
     async eventMenuC(chatID){
         try {         
+            await this.client.sendMessage(chatID, "Aqui tienes el menú de bebidas: ");
             const imagen = MessageMedia.fromFilePath("./assets/images/IMG_MENU_DRINKS.jpg");
             await this.client.sendMessage(chatID, imagen, {
-                capture: true
+                caption: true
             });
             await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_DESCRIPCION);
         } catch (error) {
@@ -208,10 +236,11 @@ class flowMenu{
         }
     }
     async eventMenuD(chatID){
-        try {         
+        try {        
+            await this.client.sendMessage(chatID, "Aqui tienes el menú de postres: "); 
             const imagen = MessageMedia.fromFilePath("./assets/images/IMG_MENU_DESSERTS.jpg");
-            await this.client.sendMessage(chatID, pdf, {
-                capture: true
+            await this.client.sendMessage(chatID, imagen, {
+                caption: true
             });
             await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_DESCRIPCION);
         } catch (error) {
@@ -220,27 +249,74 @@ class flowMenu{
     }
     async eventMenuE(chatID){
         try {         
-            const imagen = MessageMedia.fromFilePath("./assets/images/IMG_MENU_PROMOTION.jpg");
-            await this.client.sendMessage(chatID, pdf, {
-                capture: true
+            const imagen = MessageMedia.fromFilePath("./assets/images/IMG_MENU_PROMOTION.jpg");            
+            await this.client.sendMessage(chatID, imagen, {
+                caption: true
             });
+            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_PROMOCION);
             await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_DESCRIPCION);
         } catch (error) {
             console.log("ERROR_EVENTO_MENU_OPCION_E: " + error);   
         }
     }
     //TODO: EVENTO QUE SE DESPLIEGA CUANDO EL USUARIO QUIERE REALIZAR UN PEDIDO
-    async eventOrder(chatID){
+    async eventOrder(msg){
         try {         
-            
+            await this.client.sendMessage(msg.from, OPCIONES_MENU.MENU_PEDIDO);
+            if (this.order[msg.from]) {
+                console.log(this.order);
+                const pedido = this.order[msg.from];
+                if (pedido.step === 1) {
+
+                    mensaje = msg.body;
+                    const regex = /Código:\s*(\d+)\s*-\s*Cantidad:\s*(\d+)/i;
+                    const match = mensaje.match(regex);
+                    console.log("match:"+ match);
+                    if (!match) {
+                        await this.client.sendMessage(msg.from, '❌ Formato incorrecto. Por favor usa el formato "Código: X - Cantidad: Y".');
+                        return;
+                    }
+                    const productoID = parseInt(match[1]);
+                    const cantidad = parseInt(match[2]);
+
+                    if (isNaN(productoID) || isNaN(cantidad)) {
+                        await this.client.sendMessage(chatID, '❌ Formato incorrecto. Por favor usa el formato "Código: X - Cantidad: Y".');
+                        return;
+                    }
+
+                    const producto = productos.find(p => p.id === productoID);
+
+                    if (!producto) {
+                        await this.client.sendMessage(chatID, '❌ Producto no encontrado.');
+                        return;
+                    }
+
+                    if (producto.stock >= cantidad) {
+                        await this.client.sendMessage(chatID, `✅ ${producto.nombre} está disponible. Cantidad solicitada: ${cantidad}`);
+                    } else {
+                        await this.client.sendMessage(chatID, `❌ ${producto.nombre} no está disponible en la cantidad solicitada. Stock actual: ${producto.stock}`);
+                    }
+
+                    //REPARAR
+                    pedido.code = productoID;
+                    pedido.quantity = cantidad;
+                    pedido.step = 2;
+                    await this.client.sendMessage(msg.from, "Envie la dirección para la entrega:");
+                  } else if (pedido.step === 2) {
+                    pedido.estado = "En camino";
+                    delete this.order[msg.from];
+                    await this.client.sendMessage(msg.from, "Pedido en camino");            
+                  }
+                return;
+            }            
         } catch (error) {
             console.log("ERROR_EVENTO_PEDIDO: " + error);   
         }
     }
-    //TODO: EVENTO QUE SE DESPLIEGA CUANDO EL USUARIO QUIERE VERIFICAR SUS PEDIDOS REALIZDOS
+    //EVENTO QUE SE DESPLIEGA CUANDO EL USUARIO QUIERE VERIFICAR SUS PEDIDOS REALIZDOS
     async eventConsult(chatID){
         try {         
-            
+            await this.client.sendMessage(chatID, "Para ver su pedido digite: Pedido:[Código pedido]");
         } catch (error) {
             console.log("ERROR_EVENTO_CONSULTA: " + error);   
         }
@@ -265,7 +341,7 @@ class flowMenu{
             console.log("ERROR_EVENTO_AGENTE: " + error);   
         }
     }
-    //EVENTO DE AYUDA QUE APARECE CUANDO EL MENSAJE DEL NO COINCIDE CON LAS OPCIONES
+    //EVENTO DE AYUDA QUE APARECE CUANDO EL MENSAJE DEL USUARIO NO COINCIDE CON LAS OPCIONES
     async eventHelp(chatID){
         try {         
             await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_AYUDA);
@@ -274,10 +350,51 @@ class flowMenu{
             console.log("ERROR_EVENTO_AYUDA: " + error);   
         }
     }
+    //EVENTO PARA BUSCAR PEDIDO
+    async eventBuscarPedido(chatID, mensaje){
+        try {                    
+            const regex = /Pedido:\s*(\d+)/i;
+            const match = mensaje.match(regex);
+
+            if (!match) {
+                await client.sendMessage(chatID, '❌ Formato incorrecto. Por favor usa el formato "Pedido: X".');
+                return;
+            }
+
+            const pedidoID = parseInt(match[1]);
+
+            if (isNaN(pedidoID)) {
+                await client.sendMessage(chatID, '❌ Formato incorrecto. Por favor usa el formato "Pedido: X".');
+                return;
+            }
+            await eventEstado(chatID, pedidoID);
+            } catch (error) {
+                console.log("ERROR_EVENTO_BUSCAR_PEDIDO: " + error);   
+            }
+    }
+    async eventEstado(chatID, pedidoID){
+        const pedido = pedidos.find(p => p.id === pedidoID);
+
+        if (!pedido) {
+            await client.sendMessage(chatID, '❌ Pedido no encontrado.');
+            return;
+        }
+
+        let mensaje = `🔍 El estado de tu pedido (Código: ${pedidoID}) es: ${pedido.estado}\n`;
+        mensaje += 'Productos ordenados:\n';
+
+        pedido.productos.forEach(item => {
+            const producto = productos.find(p => p.id === item.id);
+            if (producto) {
+                mensaje += `- ${producto.nombre}: ${item.cantidad}\n`;
+            }
+        });
+    }
     //MÉTODO QUE CAMBIA EL FORMATO DE LOS MENSAJES A MINÚSCULAS
     FormateoMensaje(mensaje) {
         return mensaje.toLowerCase();   
-    }
+    }    
+
 }
 
 export default flowMenu;
