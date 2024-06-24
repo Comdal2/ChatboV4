@@ -45,6 +45,7 @@ const PALABRAS_CLAVE_BIENVENIDA = [
     "buenas",
     "ola"
 ]
+
 const PALABRAS_CLAVE_MENU = {
     MENU_OPCION_1: [
         "a",
@@ -106,7 +107,7 @@ const OPCIONES_MENU = {
     "- 10% de Descuento en pedidos mayores a $20\n"+
     "- 2x1 en pizzas todos los martes",
     MENU_UBICACION:
-    "Atendemos todos los días de Lun - Vie de [ 10:00 A.M. - 8:00 P.M. ]\n"+
+    "Atendemos todos los días de Lun - Vie de 10:00 AM - 8:00 PM\n"+
     "O si prefieres puedes visitarnos:",
     MENU_AGENTE:
     "Si deseas porte en contacto con nosotros puedes usar nuestra línea de servicio al cliente\n"+
@@ -115,18 +116,30 @@ const OPCIONES_MENU = {
     "Para realizar un pedido debe hacerlo con el siguiente formato:\n"+
     "Ejemplo: *Código: 1 - Cantidad: 1*"
 }
-//SIMULACION DE PRODUCTOS EN LA BASE DE DATOS
+//SIMULACION DE LA BASE DE DATOS
 const productos = [
     { id: 1, nombre: 'Hamburguesa', precio: 5.99, stock: 10 },
     { id: 2, nombre: 'Pizza', precio: 8.99, stock: 5 },
-    { id: 3, nombre: 'Papas Fritas', precio: 2.99, stock: 20 },
+    { id: 3, nombre: 'Postres', precio: 2.99, stock: 20 },
     { id: 4, nombre: 'Refresco', precio: 1.99, stock: 0 }
 ];
+const getInventario = () => {
+    return productos;
+};
+
 const pedidos = [
     { id: 1, estado: 'En preparación', productos: [{ id: 1, cantidad: 2 }, { id: 3, cantidad: 1 }] },
     { id: 2, estado: 'Listo para recoger', productos: [{ id: 2, cantidad: 1 }] },
     { id: 3, estado: 'Entregado', productos: [{ id: 4, cantidad: 3 }] },
     { id: 4, estado: 'Cancelado', productos: [{ id: 1, cantidad: 1 }, { id: 4, cantidad: 1 }] }
+];
+const clientes = [
+    { id: 1, nombre: "Cliente 1", nuevo: true },
+    { id: 2, nombre: "Cliente 2", nuevo: false },
+];
+const ventas = [
+    { id: 1, clienteId: 1, total: 100, fecha: '2023-06-21', cobrado: true },
+    { id: 2, clienteId: 2, total: 150, fecha: '2023-06-22', cobrado: false },
 ];
 class flowMenu{
 
@@ -143,7 +156,7 @@ class flowMenu{
     async eventMessage(msg){
         console.log("De: ", msg.from);
         console.log("Mensaje: ", msg.body);
-        if (msg.from == "593984990218@c.us") {
+        if (msg.from == "593984990218@c.us" || msg.from == "593995547555@c.us") {
             await this.eventRegisteredUser(msg);
         }
     }
@@ -165,12 +178,21 @@ class flowMenu{
             await this.eventMenuE(msg.from);
         }else if (ValidacionPalabras(this.FormateoMensaje(msg.body), PALABRAS_CLAVE_MENÚ_OPCIÓN_2)){
             await this.eventOrder(msg);
+        }else if (ValidacionPalabras(this.FormateoMensaje(msg.body), PALABRAS_CLAVE_MENÚ_OPCIÓN_3)){
+            await this.eventConsult(msg);
         }else if (ValidacionPalabras(this.FormateoMensaje(msg.body), PALABRAS_CLAVE_MENÚ_OPCIÓN_4)){
             await this.eventLocation(msg.from);
         }else if (ValidacionPalabras(this.FormateoMensaje(msg.body), PALABRAS_CLAVE_MENÚ_OPCIÓN_5)){
             await this.eventAgent(msg.from);
+        //COMANDOS OCULTOS CONOCIDOS SOLO PARA VER INFORMES
+        }else if (msg.body == "!reporte"){
+            await this.eventReporte(msg.from);
+        }else if (msg.body == "!inventario"){
+            await this.eventInventario(msg.from);
+        //MANEJO DE PEDIDOS Y DE CONSULTAS
         }else if (msg.body.startsWith('Pedido:')){
             await this.eventBuscarPedido(msg.from, msg.body);
+        //MENÚ POR DEFECTO
         } else {
             await this.eventHelp(msg.from);
         }
@@ -182,7 +204,9 @@ class flowMenu{
             await this.client.sendMessage(chatID, logo, {
                 caption: OPCIONES_MENU.MENU_BIENVENIDA
             });
+            this.delay(2500);
             await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_PRINCIPAL);
+            this.delay(2500);
             await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_OPCIONES);
         } catch (error) {
             console.log("ERROR_EVENTO_BIENVENIDA: " + error);   
@@ -197,52 +221,46 @@ class flowMenu{
             });
         } catch (error) {
             console.log("ERROR_EVENTO_MENÚ: " + error);   
-        }
+        }        
     }
     //EVENTOS QUE ENVIAN LOS DIFERENTES MENÚS DISPONIBLES
     async eventMenuA(chatID){
-        try {         
-            await this.client.sendMessage(chatID, "Aqui tienes el menú de hamburguesas: ");
+        try {                 
             const imagen = MessageMedia.fromFilePath("./assets/images/IMG_MENU_HAMBURGER.jpg");
             await this.client.sendMessage(chatID, imagen, {
-                caption: OPCIONES_MENU.MENU_DESCRIPCION
+                caption: "Aqui tienes el menú de hamburguesas.\n" + OPCIONES_MENU.MENU_DESCRIPCION
             });            
         } catch (error) {
             console.log("ERROR_EVENTO_MENU_OPCION_A: " + error);   
         }
     }
     async eventMenuB(chatID){
-        try {          
-            await this.client.sendMessage(chatID, "Aqui tienes el menú de pizzas: ");           
+        try {                               
             const pdf = MessageMedia.fromFilePath("./assets/documents/DOC_PIZZAS.pdf");
             await this.client.sendMessage(chatID, pdf, {
                 sendMediaAsDocument: true
             });
-            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_DESCRIPCION);
+            await this.client.sendMessage(chatID, "Aqui tienes el menú de pizzas\n" + OPCIONES_MENU.MENU_DESCRIPCION);
         } catch (error) {
             console.log("ERROR_EVENTO_MENU_OPCION_B: " + error);   
         }
     }
     async eventMenuC(chatID){
-        try {         
-            await this.client.sendMessage(chatID, "Aqui tienes el menú de bebidas: ");
+        try {                     
             const imagen = MessageMedia.fromFilePath("./assets/images/IMG_MENU_DRINKS.jpg");
             await this.client.sendMessage(chatID, imagen, {
-                caption: true
+                caption:"Aqui tienes el menú de bebidas.\n" + OPCIONES_MENU.MENU_DESCRIPCION
             });
-            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_DESCRIPCION);
         } catch (error) {
             console.log("ERROR_EVENTO_MENU_OPCION_C: " + error);   
         }
     }
     async eventMenuD(chatID){
         try {        
-            await this.client.sendMessage(chatID, "Aqui tienes el menú de postres: "); 
             const imagen = MessageMedia.fromFilePath("./assets/images/IMG_MENU_DESSERTS.jpg");
             await this.client.sendMessage(chatID, imagen, {
-                caption: true
+                caption: "Aqui tienes el menú de postres.\n" + OPCIONES_MENU.MENU_DESCRIPCION
             });
-            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_DESCRIPCION);
         } catch (error) {
             console.log("ERROR_EVENTO_MENU_OPCION_D: " + error);   
         }
@@ -251,10 +269,8 @@ class flowMenu{
         try {         
             const imagen = MessageMedia.fromFilePath("./assets/images/IMG_MENU_PROMOTION.jpg");            
             await this.client.sendMessage(chatID, imagen, {
-                caption: true
+                caption: OPCIONES_MENU.MENU_PROMOCION + "\n" + OPCIONES_MENU.MENU_DESCRIPCION
             });
-            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_PROMOCION);
-            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_DESCRIPCION);
         } catch (error) {
             console.log("ERROR_EVENTO_MENU_OPCION_E: " + error);   
         }
@@ -262,53 +278,66 @@ class flowMenu{
     //TODO: EVENTO QUE SE DESPLIEGA CUANDO EL USUARIO QUIERE REALIZAR UN PEDIDO
     async eventOrder(msg){
         try {         
+             // Asegúrate de que `this.order` esté inicializado
+            if (!this.order) {
+                this.order = {};
+            }
+
+            // Envía el menú de pedido al usuario
             await this.client.sendMessage(msg.from, OPCIONES_MENU.MENU_PEDIDO);
-            if (this.order[msg.from]) {
-                console.log(this.order);
-                const pedido = this.order[msg.from];
-                if (pedido.step === 1) {
 
-                    mensaje = msg.body;
-                    const regex = /Código:\s*(\d+)\s*-\s*Cantidad:\s*(\d+)/i;
-                    const match = mensaje.match(regex);
-                    console.log("match:"+ match);
-                    if (!match) {
-                        await this.client.sendMessage(msg.from, '❌ Formato incorrecto. Por favor usa el formato "Código: X - Cantidad: Y".');
-                        return;
-                    }
-                    const productoID = parseInt(match[1]);
-                    const cantidad = parseInt(match[2]);
+            // Inicializa un nuevo pedido si no existe
+            if (!this.order[msg.from]) {
+                this.order[msg.from] = { step: 1 };
+            }
 
-                    if (isNaN(productoID) || isNaN(cantidad)) {
-                        await this.client.sendMessage(chatID, '❌ Formato incorrecto. Por favor usa el formato "Código: X - Cantidad: Y".');
-                        return;
-                    }
+            // Recupera el pedido del usuario
+            const pedido = this.order[msg.from];
 
-                    const producto = productos.find(p => p.id === productoID);
+            if (pedido.step === 1) {
+                const mensaje = msg.body;
+                const regex = /Código:\s*(\d+)\s*-\s*Cantidad:\s*(\d+)/i;
+                const match = mensaje.match(regex);
 
-                    if (!producto) {
-                        await this.client.sendMessage(chatID, '❌ Producto no encontrado.');
-                        return;
-                    }
+                if (!match) {
+                    await this.client.sendMessage(msg.from, '❌ Formato incorrecto. Por favor usa el formato "Código: X - Cantidad: Y".');
+                    return;
+                }
 
-                    if (producto.stock >= cantidad) {
-                        await this.client.sendMessage(chatID, `✅ ${producto.nombre} está disponible. Cantidad solicitada: ${cantidad}`);
-                    } else {
-                        await this.client.sendMessage(chatID, `❌ ${producto.nombre} no está disponible en la cantidad solicitada. Stock actual: ${producto.stock}`);
-                    }
+                const productoID = parseInt(match[1]);
+                const cantidad = parseInt(match[2]);
 
-                    //REPARAR
-                    pedido.code = productoID;
-                    pedido.quantity = cantidad;
-                    pedido.step = 2;
-                    await this.client.sendMessage(msg.from, "Envie la dirección para la entrega:");
-                  } else if (pedido.step === 2) {
-                    pedido.estado = "En camino";
-                    delete this.order[msg.from];
-                    await this.client.sendMessage(msg.from, "Pedido en camino");            
-                  }
-                return;
-            }            
+                if (isNaN(productoID) || isNaN(cantidad)) {
+                    await this.client.sendMessage(msg.from, '❌ Formato incorrecto. Por favor usa el formato "Código: X - Cantidad: Y".');
+                    return;
+                }
+
+                const producto = productos.find(p => p.id === productoID);
+
+                if (!producto) {
+                    await this.client.sendMessage(msg.from, '❌ Producto no encontrado.');
+                    return;
+                }
+
+                if (producto.stock >= cantidad) {
+                    await this.client.sendMessage(msg.from, `✅ ${producto.nombre} está disponible. Cantidad solicitada: ${cantidad}`);
+                } else {
+                    await this.client.sendMessage(msg.from, `❌ ${producto.nombre} no está disponible en la cantidad solicitada. Stock actual: ${producto.stock}`);
+                    return;
+                }
+
+                // Actualiza el pedido con la información del producto
+                pedido.code = productoID;
+                pedido.quantity = cantidad;
+                pedido.step = 2;
+                await this.client.sendMessage(msg.from, "Envía la dirección para la entrega:");
+            } else if (pedido.step === 2) {
+                // Se asume que el mensaje recibido es la dirección
+                pedido.direccion = msg.body;
+                pedido.estado = "En camino";
+                await this.client.sendMessage(msg.from, "✅ Pedido en camino. Gracias por su compra.");
+                delete this.order[msg.from]; // Resetea el pedido del usuario
+            }          
         } catch (error) {
             console.log("ERROR_EVENTO_PEDIDO: " + error);   
         }
@@ -344,8 +373,7 @@ class flowMenu{
     //EVENTO DE AYUDA QUE APARECE CUANDO EL MENSAJE DEL USUARIO NO COINCIDE CON LAS OPCIONES
     async eventHelp(chatID){
         try {         
-            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_AYUDA);
-            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_OPCIONES);
+            await this.client.sendMessage(chatID, OPCIONES_MENU.MENU_AYUDA + "\n" + OPCIONES_MENU.MENU_OPCIONES);
         } catch (error) {
             console.log("ERROR_EVENTO_AYUDA: " + error);   
         }
@@ -367,7 +395,7 @@ class flowMenu{
                 await client.sendMessage(chatID, '❌ Formato incorrecto. Por favor usa el formato "Pedido: X".');
                 return;
             }
-            await eventEstado(chatID, pedidoID);
+            await this.eventEstado(chatID, pedidoID);
             } catch (error) {
                 console.log("ERROR_EVENTO_BUSCAR_PEDIDO: " + error);   
             }
@@ -380,7 +408,7 @@ class flowMenu{
             return;
         }
 
-        let mensaje = `🔍 El estado de tu pedido (Código: ${pedidoID}) es: ${pedido.estado}\n`;
+        let mensaje = `🔍 El estado de tu pedido (Pedido: ${pedidoID}) es: ${pedido.estado}\n`;
         mensaje += 'Productos ordenados:\n';
 
         pedido.productos.forEach(item => {
@@ -390,10 +418,63 @@ class flowMenu{
             }
         });
     }
+    //REPORTES
+    async eventReporte(chatID){
+        try {         
+            // Generar reportes
+            const reporteClientesNuevos = this.generarReporteClientesNuevos(clientes);
+            const reporteCarteraReportada = this.generarReporteCarteraReportada(ventas);
+            const reporteCarteraCobrada = this.generarReporteCarteraCobrada(ventas);
+
+            // Enviar reportes
+            await this.client.sendMessage(chatID, '📊 Reporte de Captación de Clientes Nuevos:\n' + reporteClientesNuevos);
+            this.delay(2500)
+
+            await this.client.sendMessage(chatID, '📊 Reporte de Cartera Reportada:\n' + reporteCarteraReportada);
+            this.delay(2500)
+
+            await this.client.sendMessage(chatID, '📊 Reporte de Cartera Cobrada:\n' + reporteCarteraCobrada);
+        } catch (error) {
+            console.log("ERROR_EVENTO_REPORTE: " + error);   
+        }
+    }
+    //INVENTARIO
+    async eventInventario(chatID){
+        try {
+            const inventario = getInventario();
+            let response = "- Inventario -\n";
+            inventario.forEach(item => {
+                response += `${item.nombre}: ${item.stock}\n`;
+            });
+            await this.client.sendMessage(chatID, response);
+        } catch (error) {
+            console.log("ERROR_EVENTO_INVENTARIO: " + error); 
+        }
+    }
     //MÉTODO QUE CAMBIA EL FORMATO DE LOS MENSAJES A MINÚSCULAS
     FormateoMensaje(mensaje) {
         return mensaje.toLowerCase();   
-    }    
+    } 
+    //MÉTODO QUE ESTABLECE UN CRONOMETRO ENTRE MENSAJES
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    //METODOS PARA GENERAR REPORTES
+    generarReporteClientesNuevos(clientes) {
+        const clientesNuevos = clientes.filter(cliente => cliente.nuevo);
+        return `Clientes nuevos: ${clientesNuevos.length}\n` + clientesNuevos.map(cliente => cliente.nombre).join('\n');
+    }
+    
+    generarReporteCarteraReportada(ventas) {
+        const totalReportado = ventas.reduce((sum, venta) => sum + venta.total, 0);
+        return `Cartera reportada: $${totalReportado}`;
+    }
+    
+    generarReporteCarteraCobrada(ventas) {
+        const totalCobrado = ventas.filter(venta => venta.cobrado).reduce((sum, venta) => sum + venta.total, 0);
+        return `Cartera cobrada: $${totalCobrado}`;
+    }
+    
 
 }
 

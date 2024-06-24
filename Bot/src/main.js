@@ -25,6 +25,6 @@ client.on('qr', qr => {
 });
 
 client.initialize().catch((err) => {
-    console.error("No se pudo iniciar el cliente. ERROR: ", err);
+    console.error("ERROR_INICIO_DE_CLIENTE: ", err);
   });
 
