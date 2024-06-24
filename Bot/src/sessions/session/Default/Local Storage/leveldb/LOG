@@ -1,3 +1,15 @@
-2024/06/24-00:01:08.245 4a8c Reusing MANIFEST C:\Users\Comdal\Desktop\ChatbotP\ChatboV4\Bot\src\sessions\session\Default\Local Storage\leveldb/MANIFEST-000001
-2024/06/24-00:01:08.248 4a8c Recovering log #25
-2024/06/24-00:01:08.260 4a8c Reusing old log C:\Users\Comdal\Desktop\ChatbotP\ChatboV4\Bot\src\sessions\session\Default\Local Storage\leveldb/000025.log 
+2024/06/24-08:03:00.639 2630 Reusing MANIFEST C:\Users\Comdal\Desktop\ChatbotP\ChatboV4\Bot\src\sessions\session\Default\Local Storage\leveldb/MANIFEST-000001
+2024/06/24-08:03:00.649 2630 Recovering log #25
+2024/06/24-08:03:00.650 2630 Reusing old log C:\Users\Comdal\Desktop\ChatbotP\ChatboV4\Bot\src\sessions\session\Default\Local Storage\leveldb/000025.log 
+2024/06/24-08:05:02.155 32b8 Level-0 table #29: started
+2024/06/24-08:05:02.160 32b8 Level-0 table #29: 21984 bytes OK
+2024/06/24-08:05:02.161 32b8 Delete type=0 #25
+2024/06/24-08:05:02.174 32b8 Compacting 4@0 + 1@1 files
+2024/06/24-08:05:02.180 32b8 Generated table #30@0: 145 keys, 10510 bytes
+2024/06/24-08:05:02.180 32b8 Compacted 4@0 + 1@1 files => 10510 bytes
+2024/06/24-08:05:02.181 32b8 compacted to: files[ 0 1 1 0 0 0 0 ]
+2024/06/24-08:05:02.182 32b8 Delete type=2 #17
+2024/06/24-08:05:02.182 32b8 Delete type=2 #20
+2024/06/24-08:05:02.182 32b8 Delete type=2 #23
+2024/06/24-08:05:02.182 32b8 Delete type=2 #26
+2024/06/24-08:05:02.182 32b8 Delete type=2 #29

@@ -22,6 +22,7 @@ client.on('ready', () => {
 client.on('qr', qr => {
     qrcode.generate(qr, {small: true});
     new flowMenu(client);
+    //new flowAutomatico(client);
 });
 
 client.initialize().catch((err) => {
