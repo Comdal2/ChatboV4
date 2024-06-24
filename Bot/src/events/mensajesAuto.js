@@ -15,7 +15,6 @@ const MENSAJES_AUTOMATICOS = {
 class flowAutomatico{
     constructor(client){
         this.client = client;
-
         this.auto = [
             {message: MENSAJES_AUTOMATICOS.MENSAJE_PROMOCION, time: "35 10 * * *"}
         ];
@@ -65,11 +64,9 @@ class flowAutomatico{
         const imagen = MessageMedia.fromFilePath("./assets/images/IMG_MENU_PROMOTION.jpg");
         await this.client.sendMessage(to, imagen, { caption: message });
       }
-    
       delay(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
       }
-    
       async eventDeudaMensaje() {
         try {
             for (const phone of this.deu) {

@@ -1,6 +1,7 @@
 import pkg from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
 import flowMenu from "./events/mensajes.js"
+import flowAutomatico from "./events/mensajesAuto.js";
 
 const { Client, LocalAuth } = pkg;
 
@@ -22,7 +23,7 @@ client.on('ready', () => {
 client.on('qr', qr => {
     qrcode.generate(qr, {small: true});
     new flowMenu(client);
-    //new flowAutomatico(client);
+    new flowAutomatico(client);
 });
 
 client.initialize().catch((err) => {

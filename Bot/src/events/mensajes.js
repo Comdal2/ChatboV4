@@ -275,23 +275,19 @@ class flowMenu{
             console.log("ERROR_EVENTO_MENU_OPCION_E: " + error);   
         }
     }
-    //TODO: EVENTO QUE SE DESPLIEGA CUANDO EL USUARIO QUIERE REALIZAR UN PEDIDO
+    //EVENTO QUE SE DESPLIEGA CUANDO EL USUARIO QUIERE REALIZAR UN PEDIDO
     async eventOrder(msg){
         try {         
-             // Asegúrate de que `this.order` esté inicializado
             if (!this.order) {
                 this.order = {};
             }
 
-            // Envía el menú de pedido al usuario
             await this.client.sendMessage(msg.from, OPCIONES_MENU.MENU_PEDIDO);
 
-            // Inicializa un nuevo pedido si no existe
             if (!this.order[msg.from]) {
                 this.order[msg.from] = { step: 1 };
             }
 
-            // Recupera el pedido del usuario
             const pedido = this.order[msg.from];
 
             if (pedido.step === 1) {
@@ -326,17 +322,15 @@ class flowMenu{
                     return;
                 }
 
-                // Actualiza el pedido con la información del producto
                 pedido.code = productoID;
                 pedido.quantity = cantidad;
                 pedido.step = 2;
                 await this.client.sendMessage(msg.from, "Envía la dirección para la entrega:");
             } else if (pedido.step === 2) {
-                // Se asume que el mensaje recibido es la dirección
                 pedido.direccion = msg.body;
                 pedido.estado = "En camino";
                 await this.client.sendMessage(msg.from, "✅ Pedido en camino. Gracias por su compra.");
-                delete this.order[msg.from]; // Resetea el pedido del usuario
+                delete this.order[msg.from];
             }          
         } catch (error) {
             console.log("ERROR_EVENTO_PEDIDO: " + error);   
